@@ -10,7 +10,7 @@ export class BubbleCanvas extends Component {
   }
 
   animate = event => {
-    this.bubble.animate();
+    this.bubble.animate(event);
   };
 
   getBBoxFromBubble(bubble) {
