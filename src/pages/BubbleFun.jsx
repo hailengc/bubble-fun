@@ -11,9 +11,7 @@ export class BubbleFun extends Component {
   render() {
     return (
       <div className="bubble-fun">
-        <div className="bubble-canvas">
-          <BubbleCanvas />
-        </div>
+        <BubbleCanvas />>
       </div>
     );
   }

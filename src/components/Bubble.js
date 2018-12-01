@@ -17,8 +17,13 @@ class Bubble extends Circle {
         y: 0.0005
       },
       scaleRange: {
-        x: 0.08,
-        y: 0.08
+        x: 0.06,
+        y: 0.06
+      },
+      rotation: {
+        direction: Math.random() > 0.5 ? 1 : -1,
+        timeFactor: Math.random() * 3 + 1,
+        degreeFactor: Math.random() * 0.2 + 1
       }
     };
 
@@ -26,7 +31,7 @@ class Bubble extends Circle {
       gradient: {
         stops: [
           [new Color(1, 1, 1, 0), 0.8],
-          [new Color(1.0, 1.0, 1.0, 1.0), 1]
+          [new Color(1.0, 1.0, 1.0, 1.0), 1.0]
         ],
         radial: true
       },
@@ -34,9 +39,10 @@ class Bubble extends Circle {
       destination: this.bounds.rightCenter
     };
 
+    let { x, y } = this.data.scaleRange;
     this.scaling = {
-      x: 1 + Math.random() * 0.04,
-      y: 1 - Math.random() * 0.04
+      x: Math.random() * x * 2 - x + 1,
+      y: Math.random() * y * 2 - y + 1
     };
   }
   getNextXScaling = event => {
@@ -47,7 +53,7 @@ class Bubble extends Circle {
     if (
       prevXScaling >= 1.0 + scaleRange.x ||
       prevXScaling < 1.0 - scaleRange.x ||
-      Math.random() > 0.5
+      Math.random() > 0.6
     ) {
       scaleDirection.x *= -1;
     }
@@ -61,7 +67,7 @@ class Bubble extends Circle {
     if (
       prevYScaling >= 1.0 + scaleRange.y ||
       prevYScaling < 1.0 - scaleRange.y ||
-      Math.random() > 0.5
+      Math.random() > 0.8
     ) {
       scaleDirection.y *= -1;
     }
@@ -75,13 +81,18 @@ class Bubble extends Circle {
     };
   };
 
-  setNextRotate = () => {
-    this.rotate(4 * Math.random());
+  setNextRotate = event => {
+    let { direction, timeFactor, degreeFactor } = this.data.rotation;
+    let degree =
+      degreeFactor *
+        Math.sin((Math.PI * (event.count % 360)) / timeFactor / 180) +
+      1.2 * degreeFactor;
+    this.rotate(degree * direction);
   };
 
   animate = event => {
     this.setNextScaling(event);
-    this.setNextRotate();
+    this.setNextRotate(event);
   };
 }
 
