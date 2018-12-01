@@ -6,7 +6,7 @@ class Bubble extends Circle {
     return item.data.isBubble === true;
   }
 
-  constructor(position, radius) {
+  constructor(position, radius, rgba) {
     super(position, radius);
 
     this.applyMatrix = false;
@@ -36,11 +36,12 @@ class Bubble extends Circle {
       }
     };
 
+    let { r, g, b, a } = rgba;
     this.fillColor = {
       gradient: {
         stops: [
-          [new Color(1, 1, 1, 0), 0.8],
-          [new Color(1.0, 1.0, 1.0, 1.0), 1.0]
+          [new Color(r / 255, g / 255, b / 255, 0), 0.78],
+          [new Color(r / 255, g / 255, b / 255, a), 1.0]
         ],
         radial: true
       },

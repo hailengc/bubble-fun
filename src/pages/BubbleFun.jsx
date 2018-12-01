@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import BubbleCanvas from "../components/BubbleCanvas";
+
 import "./BubbleFun.less";
 
 export class BubbleFun extends Component {
@@ -11,7 +12,8 @@ export class BubbleFun extends Component {
   render() {
     return (
       <div className="bubble-fun">
-        <BubbleCanvas />>
+        <BubbleCanvas />
+        
       </div>
     );
   }

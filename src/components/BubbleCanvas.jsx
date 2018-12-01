@@ -2,11 +2,16 @@ import React, { Component } from "react";
 import Paper, { Path, Point, Color } from "paper";
 import "./BubbleCanvas.less";
 import Bubble from "./Bubble";
+import { ChromePicker } from "react-color";
 
 export class BubbleCanvas extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      setColor: "bbColor",
+      backgroundColor: { r: 54, g: 176, b: 220 },
+      bubbleColor: { r: 255, g: 255, b: 255, a: 0.6 }
+    };
   }
 
   animate = event => {
@@ -39,10 +44,11 @@ export class BubbleCanvas extends Component {
     this.paintLayer.activate();
 
     this.background = new Path.Rectangle(this.paperView.bounds);
-    this.background.fillColor = "lightblue";
+    let { r, g, b } = this.state.backgroundColor;
+    this.background.fillColor = new Color(r / 255, g / 255, b / 255);
 
     this.paintLayer.onMouseDown = event => {
-      this.buidingBubble = new Bubble(event.point, 5);
+      this.buidingBubble = new Bubble(event.point, 5, this.state.bubbleColor);
       this.buidingBubble.build();
       this.paintLayer.addChild(this.buidingBubble);
     };
@@ -53,10 +59,57 @@ export class BubbleCanvas extends Component {
     this.paperView.onFrame = this.animate;
   };
 
+  setColorFor = e => {
+    this.setState({ setColor: e.target.value });
+  };
+
+  get color() {
+    if (this.state.setColor === "bkColor") {
+      return this.state.backgroundColor;
+    } else {
+      return this.state.bubbleColor;
+    }
+  }
+
+  onColorSelected = color => {
+    console.log(color);
+
+    if (this.state.setColor === "bkColor") {
+      this.background.fillColor = color.hex;
+      this.setState({ backgroundColor: color.rgb });
+    } else {
+      this.setState({ bubbleColor: color.rgb });
+    }
+  };
+
   render() {
     return (
       <div>
         <canvas id="bubbleCanvas" className="canvas" />
+        <div className="panel">
+          <div>
+            <input
+              type="radio"
+              value="bkColor"
+              onChange={this.setColorFor}
+              checked={this.state.setColor === "bkColor"}
+              id="bkColor"
+            />
+            <label htmlFor="bkColor">Backgroug Color</label>
+            <input
+              type="radio"
+              value="bbColor"
+              onChange={this.setColorFor}
+              checked={this.state.setColor === "bbColor"}
+              id="bbColor"
+            />
+            <label htmlFor="bbColor">Bubble Color</label>
+          </div>
+          <ChromePicker
+            color={this.color}
+            onChangeComplete={this.onColorSelected}
+          />
+        </div>
       </div>
     );
   }
