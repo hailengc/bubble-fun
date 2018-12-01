@@ -7,12 +7,17 @@ export class BubbleCanvas extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-
-    this.bubbleList = [];
   }
 
   animate = event => {
-    this.bubbleList.forEach(b => b.animate(event));
+    this.paintLayer.children.forEach(b => {
+      if (Bubble.isBubble(b)) {
+        b.animate(event);
+        if (!this.paperView.bounds.intersects(b.bounds)) {
+          b.remove();
+        }
+      }
+    });
   };
 
   getBBoxFromBubble(bubble) {
@@ -34,10 +39,16 @@ export class BubbleCanvas extends Component {
     this.paintLayer.activate();
 
     this.background = new Path.Rectangle(this.paperView.bounds);
-    this.background.fillColor = "darkblue";
+    this.background.fillColor = "lightblue";
 
-    this.bubbleList.push(new Bubble(new Point(400, 200), 80));
-    // this.bubbleList.push(new Bubble(new Point(700, 300), 80));
+    this.paintLayer.onMouseDown = event => {
+      this.buidingBubble = new Bubble(event.point, 5);
+      this.buidingBubble.build();
+      this.paintLayer.addChild(this.buidingBubble);
+    };
+    this.paintLayer.onMouseUp = event => {
+      this.buidingBubble && this.buidingBubble.startMoving();
+    };
 
     this.paperView.onFrame = this.animate;
   };

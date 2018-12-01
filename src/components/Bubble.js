@@ -1,13 +1,19 @@
-import { Path, Color } from "paper";
+import { Path, Color, Point } from "paper";
 
 const Circle = Path.Circle;
 class Bubble extends Circle {
+  static isBubble(item) {
+    return item.data.isBubble === true;
+  }
+
   constructor(position, radius) {
     super(position, radius);
 
     this.applyMatrix = false;
 
     this.data = {
+      isBubble: true,
+      moving: false,
       scaleDirection: {
         x: 1,
         y: -1
@@ -22,8 +28,11 @@ class Bubble extends Circle {
       },
       rotation: {
         direction: Math.random() > 0.5 ? 1 : -1,
-        timeFactor: Math.random() * 3 + 1,
+        timeFactor: Math.random() * 2 + 1,
         degreeFactor: Math.random() * 0.2 + 1
+      },
+      position: {
+        xFactor: Math.random() * 0.8 - 0.4
       }
     };
 
@@ -85,14 +94,39 @@ class Bubble extends Circle {
     let { direction, timeFactor, degreeFactor } = this.data.rotation;
     let degree =
       degreeFactor *
-        Math.sin((Math.PI * (event.count % 360)) / timeFactor / 180) +
+        Math.sin((Math.PI * ((event.count / timeFactor) % 360)) / 180) +
       1.2 * degreeFactor;
     this.rotate(degree * direction);
+  };
+
+  setNextLocation = event => {
+    this.position = this.position.add(
+      new Point(
+        Math.sin((Math.PI * ((event.count / 2) % 360)) / 180) * 0.2 +
+          this.data.position.xFactor,
+        -0.2
+      )
+    );
+  };
+
+  build = () => {
+    this.buildTimer = setInterval(() => {
+      this.scale(1.01);
+    }, 10);
+  };
+
+  startMoving = () => {
+    clearInterval(this.buildTimer);
+    this.data.moving = true;
   };
 
   animate = event => {
     this.setNextScaling(event);
     this.setNextRotate(event);
+
+    if (this.data.moving) {
+      this.setNextLocation(event);
+    }
   };
 }
 
