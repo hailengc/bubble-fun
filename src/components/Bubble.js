@@ -1,5 +1,16 @@
 import { Path, Color, Point } from "paper";
 
+function randomIn(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function randomPick(...x) {
+  let r = Math.random() * x.length;
+  console.log(x[Math.trunc(r)]);
+
+  return x[Math.trunc(r)];
+}
+
 const Circle = Path.Circle;
 class Bubble extends Circle {
   static isBubble(item) {
@@ -8,31 +19,34 @@ class Bubble extends Circle {
 
   constructor(position, radius, rgba) {
     super(position, radius);
-
     this.applyMatrix = false;
 
+    let directionX = randomPick(-1, 1);
     this.data = {
       isBubble: true,
       moving: false,
       scaleDirection: {
-        x: 1,
-        y: -1
+        x: directionX,
+        y: -directionX
       },
-      scaleDelta: {
-        x: 0.0005,
-        y: 0.0005
-      },
+
       scaleRange: {
-        x: 0.06,
-        y: 0.06
+        x: {
+          min: 0.97,
+          max: 1.03
+        },
+        y: {
+          min: 0.97,
+          max: 1.03
+        }
       },
       rotation: {
-        direction: Math.random() > 0.5 ? 1 : -1,
-        timeFactor: Math.random() * 2 + 1,
-        degreeFactor: Math.random() * 0.2 + 1
+        direction: randomPick(-1, 1),
+        timeFactor: randomIn(60, 60),
+        degreeFactor: randomIn(0.8, 1.5)
       },
       position: {
-        xFactor: Math.random() * 0.8 - 0.4
+        xFactor: randomIn(-0.4, 0.4)
       }
     };
 
@@ -49,39 +63,52 @@ class Bubble extends Circle {
       destination: this.bounds.rightCenter
     };
 
-    let { x, y } = this.data.scaleRange;
     this.scaling = {
-      x: Math.random() * x * 2 - x + 1,
-      y: Math.random() * y * 2 - y + 1
+      x: 1.0,
+      y: 1.0
+    };
+    this.data.baseScaling = this.scaling.clone();
+    this.data.scaleDelta = {
+      x: 0.0006 * this.scaling.x,
+      y: 0.0006 * this.scaling.y
     };
   }
   getNextXScaling = event => {
     let prevXScaling = this.scaling.x;
 
-    let { scaleDirection, scaleRange, scaleDelta } = this.data;
+    let { scaleDirection, scaleRange, scaleDelta, baseScaling } = this.data;
 
     if (
-      prevXScaling >= 1.0 + scaleRange.x ||
-      prevXScaling < 1.0 - scaleRange.x ||
-      Math.random() > 0.6
+      prevXScaling >= baseScaling.x * scaleRange.x.max ||
+      prevXScaling < baseScaling.x * scaleRange.x.min
     ) {
       scaleDirection.x *= -1;
     }
-    return prevXScaling + scaleDirection.x * (Math.random() * scaleDelta.x);
+    return (
+      prevXScaling +
+      scaleDirection.x *
+        (scaleDelta.x *
+          (1 -
+            Math.abs(
+              this.scaling.x / baseScaling.x -
+                (scaleRange.x.max + scaleRange.x.min) / 2
+            ) /
+              (scaleRange.x.max - scaleRange.x.min) /
+              2))
+    );
   };
 
   getNextYScaling = event => {
     let prevYScaling = this.scaling.y;
-    let { scaleDirection, scaleRange, scaleDelta } = this.data;
-
-    if (
-      prevYScaling >= 1.0 + scaleRange.y ||
-      prevYScaling < 1.0 - scaleRange.y ||
-      Math.random() > 0.8
-    ) {
-      scaleDirection.y *= -1;
-    }
-    return prevYScaling + scaleDirection.y * (Math.random() * scaleDelta.y);
+    // let { scaleDirection, scaleRange, scaleDelta, baseScaling } = this.data;
+    // if (
+    //   prevYScaling >= baseScaling.y * scaleRange.y.max ||
+    //   prevYScaling < baseScaling.y * scaleRange.y.min
+    // ) {
+    //   scaleDirection.y *= -1;
+    // }
+    // return prevYScaling + scaleDirection.y * scaleDelta.y;
+    return prevYScaling;
   };
 
   setNextScaling = event => {
@@ -94,9 +121,10 @@ class Bubble extends Circle {
   setNextRotate = event => {
     let { direction, timeFactor, degreeFactor } = this.data.rotation;
     let degree =
-      degreeFactor *
+      (this.scaling.x / this.data.baseScaling.x) *
+        degreeFactor *
         Math.sin((Math.PI * ((event.count / timeFactor) % 360)) / 180) +
-      1.2 * degreeFactor;
+      degreeFactor;
     this.rotate(degree * direction);
   };
 
@@ -110,22 +138,26 @@ class Bubble extends Circle {
     );
   };
 
-  build = () => {
+  startBuild = () => {
     this.buildTimer = setInterval(() => {
-      this.scale(1.01);
+      this.scaling = this.scaling.add(0.2);
+      this.data.baseScaling = this.scaling.clone();
+      this.data.scaleDelta = {
+        x: 0.0006 * this.scaling.x,
+        y: 0.0006 * this.scaling.y
+      };
     }, 10);
   };
 
-  startMoving = () => {
+  endBuild = () => {
     clearInterval(this.buildTimer);
     this.data.moving = true;
   };
 
   animate = event => {
-    this.setNextScaling(event);
-    this.setNextRotate(event);
-
     if (this.data.moving) {
+      this.setNextScaling(event);
+      this.setNextRotate(event);
       this.setNextLocation(event);
     }
   };

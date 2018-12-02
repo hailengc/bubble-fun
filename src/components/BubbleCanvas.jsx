@@ -49,11 +49,11 @@ export class BubbleCanvas extends Component {
 
     this.paintLayer.onMouseDown = event => {
       this.buidingBubble = new Bubble(event.point, 5, this.state.bubbleColor);
-      this.buidingBubble.build();
+      this.buidingBubble.startBuild();
       this.paintLayer.addChild(this.buidingBubble);
     };
     this.paintLayer.onMouseUp = event => {
-      this.buidingBubble && this.buidingBubble.startMoving();
+      this.buidingBubble && this.buidingBubble.endBuild();
     };
 
     this.paperView.onFrame = this.animate;
