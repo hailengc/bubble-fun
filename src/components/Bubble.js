@@ -6,8 +6,6 @@ function randomIn(min, max) {
 
 function randomPick(...x) {
   let r = Math.random() * x.length;
-  console.log(x[Math.trunc(r)]);
-
   return x[Math.trunc(r)];
 }
 
@@ -17,12 +15,24 @@ class Bubble extends Circle {
     return item.data.isBubble === true;
   }
 
+  static createBubble() {
+    let posX = randomIn(0, 1200);
+    let posY = randomIn(0, 800);
+    let radius = randomIn(80, 200);
+    let rgba = { r: 255, g: 255, b: 255, a: randomIn(0.3, 0.8) };
+    let b = new Bubble(new Point(posX, posY), radius, rgba);
+    b.startBuild();
+    b.endBuild();
+    return b;
+  }
+
   constructor(position, radius, rgba) {
     super(position, radius);
     this.applyMatrix = false;
 
     let directionX = randomPick(-1, 1);
     this.data = {
+      radius,
       isBubble: true,
       moving: false,
       scaleDirection: {
@@ -50,7 +60,7 @@ class Bubble extends Circle {
       }
     };
 
-    let { r, g, b, a } = rgba;
+    let { r, g, b, a } = rgba || { r: 255, g: 255, b: 255, a: 0.7 };
     this.fillColor = {
       gradient: {
         stops: [
@@ -68,15 +78,11 @@ class Bubble extends Circle {
       y: 1.0
     };
     this.data.baseScaling = this.scaling.clone();
-    this.data.scaleDelta = {
-      x: 0.0006 * this.scaling.x,
-      y: 0.0006 * this.scaling.y
-    };
   }
   getNextXScaling = event => {
     let prevXScaling = this.scaling.x;
 
-    let { scaleDirection, scaleRange, scaleDelta, baseScaling } = this.data;
+    let { scaleDirection, scaleRange, baseScaling } = this.data;
 
     if (
       prevXScaling >= baseScaling.x * scaleRange.x.max ||
@@ -86,28 +92,12 @@ class Bubble extends Circle {
     }
     return (
       prevXScaling +
-      scaleDirection.x *
-        (scaleDelta.x *
-          (1 -
-            Math.abs(
-              this.scaling.x / baseScaling.x -
-                (scaleRange.x.max + scaleRange.x.min) / 2
-            ) /
-              (scaleRange.x.max - scaleRange.x.min) /
-              2))
+      scaleDirection.x * (prevXScaling * randomIn(0.0006, 0.0012))
     );
   };
 
   getNextYScaling = event => {
     let prevYScaling = this.scaling.y;
-    // let { scaleDirection, scaleRange, scaleDelta, baseScaling } = this.data;
-    // if (
-    //   prevYScaling >= baseScaling.y * scaleRange.y.max ||
-    //   prevYScaling < baseScaling.y * scaleRange.y.min
-    // ) {
-    //   scaleDirection.y *= -1;
-    // }
-    // return prevYScaling + scaleDirection.y * scaleDelta.y;
     return prevYScaling;
   };
 
@@ -142,10 +132,6 @@ class Bubble extends Circle {
     this.buildTimer = setInterval(() => {
       this.scaling = this.scaling.add(0.2);
       this.data.baseScaling = this.scaling.clone();
-      this.data.scaleDelta = {
-        x: 0.0006 * this.scaling.x,
-        y: 0.0006 * this.scaling.y
-      };
     }, 10);
   };
 

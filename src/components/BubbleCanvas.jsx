@@ -56,6 +56,10 @@ export class BubbleCanvas extends Component {
       this.buidingBubble && this.buidingBubble.endBuild();
     };
 
+    for (let index = 0; index < 8; index++) {
+      this.paintLayer.addChild(Bubble.createBubble());
+    }
+
     this.paperView.onFrame = this.animate;
   };
 
@@ -85,6 +89,9 @@ export class BubbleCanvas extends Component {
   render() {
     return (
       <div>
+        <div className="title">
+          Press and hold left mouse button to create bubble.
+        </div>
         <canvas id="bubbleCanvas" className="canvas" />
         <div className="panel">
           <div>
@@ -95,7 +102,7 @@ export class BubbleCanvas extends Component {
               checked={this.state.setColor === "bkColor"}
               id="bkColor"
             />
-            <label htmlFor="bkColor">Backgroug Color</label>
+            <label htmlFor="bkColor">Background Color</label>
             <input
               type="radio"
               value="bbColor"
