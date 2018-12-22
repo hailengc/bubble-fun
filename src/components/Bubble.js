@@ -53,7 +53,7 @@ class Bubble extends Circle {
       rotation: {
         direction: randomPick(-1, 1),
         timeFactor: randomIn(60, 60),
-        degreeFactor: randomIn(0.8, 1.5)
+        degreeFactor: randomIn(0.5, 1.1)
       },
       position: {
         xFactor: randomIn(-0.4, 0.4)
@@ -92,7 +92,7 @@ class Bubble extends Circle {
     }
     return (
       prevXScaling +
-      scaleDirection.x * (prevXScaling * randomIn(0.0006, 0.0012))
+      scaleDirection.x * (prevXScaling * randomIn(0.0004, 0.0008))
     );
   };
 
@@ -115,6 +115,7 @@ class Bubble extends Circle {
         degreeFactor *
         Math.sin((Math.PI * ((event.count / timeFactor) % 360)) / 180) +
       degreeFactor;
+    degree = degree * randomIn(0.9, 1.1);
     this.rotate(degree * direction);
   };
 
